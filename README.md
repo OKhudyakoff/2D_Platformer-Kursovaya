@@ -1,4 +1,3 @@
-# 2D_Platformer-Kursovaya
 <div align="center">
   <h1>This is my term paper for object oriented programming</h1>
   <h2>Menu<h2>
