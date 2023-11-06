@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -14,14 +15,11 @@ public class Player : MonoBehaviour
 
     #region Components
 
-    public Animator Anim { get; private set; }
-
+    public Animator Player_Animator { get; private set; }
     public PlayerInputHandler InputHandler;
-    public Rigidbody2D RB { get; private set; }
-
+    public Rigidbody2D Player_Rigidbody { get; private set; }
     public Vector2 CurrentVelocity { get; private set; }
     public int FacingDirection { get; private set; }
-
     public Collider2D Player_Collider { get; private set;}
 
     #endregion
@@ -37,11 +35,21 @@ public class Player : MonoBehaviour
     [SerializeField] private PlayerData playerData;
 
     private Vector2 workSpace;
-    [SerializeField] private bool isTouchingWall;
+    //[SerializeField] private bool isTouchingWall;
 
     #endregion
 
     #region Unity Callback Functions
+
+    private void OnEnable()
+    {
+        GameManager.OnGameOver += OnGameOver;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.OnGameOver -= OnGameOver;
+    }
 
     private void Awake()
     {
@@ -55,16 +63,16 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        Anim = GetComponent<Animator>();
+        Player_Animator = GetComponent<Animator>();
         InputHandler = GetComponent<PlayerInputHandler>();
-        RB = GetComponent<Rigidbody2D>();
+        Player_Rigidbody = GetComponent<Rigidbody2D>();
         Player_Collider = GetComponent<Collider2D>();
         StateMachine.Initialize(InAirState);
     }
 
     private void Update()
     {
-        CurrentVelocity = RB.velocity;
+        CurrentVelocity = Player_Rigidbody.velocity;
         StateMachine.CurrentState.LogicUpdate();
     }
 
@@ -79,7 +87,7 @@ public class Player : MonoBehaviour
 
     public void SetVelocityZero()
     {
-        RB.velocity = Vector2.zero;
+        Player_Rigidbody.velocity = Vector2.zero;
         CurrentVelocity = Vector2.zero;
     }
 
@@ -87,21 +95,21 @@ public class Player : MonoBehaviour
     {
         angle.Normalize();
         workSpace.Set(angle.x * velocity * direction, angle.y * velocity);
-        RB.velocity = workSpace;
+        Player_Rigidbody.velocity = workSpace;
         CurrentVelocity = workSpace;
     }
 
     public void SetVelocityX(float velocity)
     {
         workSpace.Set(velocity, CurrentVelocity.y);
-        RB.velocity = workSpace;
+        Player_Rigidbody.velocity = workSpace;
         CurrentVelocity = workSpace;
     }
 
     public void SetVelocityY(float velocity)
     {
         workSpace.Set(CurrentVelocity.x, velocity);
-        RB.velocity = workSpace;
+        Player_Rigidbody.velocity = workSpace;
         CurrentVelocity = workSpace;
     }
 
@@ -133,6 +141,11 @@ public class Player : MonoBehaviour
     {
         FacingDirection *= -1;
         transform.Rotate(0.0f, 180, 0f, 0.0f);
+    }
+
+    private void OnGameOver()
+    {
+        Player_Collider.gameObject.SetActive(false);
     }
 
     #endregion
